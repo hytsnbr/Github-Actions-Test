@@ -12,4 +12,4 @@ env:
 
 jobs:
   build:
-    uses: ./.github/workflows/actions/java-build.yml
+    uses: ./.github/workflows/java-build.yml
