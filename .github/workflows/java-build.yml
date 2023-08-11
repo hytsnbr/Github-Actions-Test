@@ -32,7 +32,7 @@ jobs:
         with:
           java-version: ${{env.JDK_VERSION}}
           distribution: adopt
-          cache: "jdk"
+          cache: "gradle"
 
       - name: Validate Gradle Wrapper
         uses: gradle/wrapper-validation-action@v1
