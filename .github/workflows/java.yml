@@ -1,0 +1,15 @@
+name: Java
+
+on:
+  push:
+
+concurrency:
+  cancel-in-progress: true
+  group: java
+
+env:
+  JDK_VERSION: 17
+
+jobs:
+  build:
+    uses: ./.github/workflows/java/build.yml
