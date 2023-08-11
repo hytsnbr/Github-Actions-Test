@@ -1,9 +1,6 @@
 name: Java Build
 
 on:
-  push:
-
-
   workflow_call:
 
 concurrency:
