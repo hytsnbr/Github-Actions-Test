@@ -1,0 +1,34 @@
+version: 2
+
+updates:
+  - package-ecosystem: "github-actions"
+    directory: /
+    schedule:
+      interval: "daily"
+      timezone: Asia/Tokyo
+    assignees:
+      - "hytsnbr"
+    reviewers:
+      - "hytsnbr"
+    commit-message:
+      prefix: update
+      include: scope
+    labels:
+      - "dependabot"
+    open-pull-requests-limit: 99
+
+  - package-ecosystem: "gradle"
+    directory: /
+    schedule:
+      interval: "daily"
+      timezone: Asia/Tokyo
+    assignees:
+      - "hytsnbr"
+    reviewers:
+      - "hytsnbr"
+    commit-message:
+      prefix: update
+      include: scope
+    labels:
+      - "dependabot"
+    open-pull-requests-limit: 99
