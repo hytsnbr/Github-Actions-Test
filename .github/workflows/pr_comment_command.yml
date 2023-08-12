@@ -42,10 +42,36 @@ jobs:
             プルリクエストをクローズします
             再オープン：/reopen
 
+  pr_reopen:
+    if: contains(github.event.comment.html_url, '/pull/') && startsWith(github.event.comment.body , '/reopen')
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get Branch Name
+        uses: xt0rted/pull-request-comment-branch@d97294d304604fa98a2600a6e2f916a84b596dc7
+        id: get-branch-name
+        with:
+          repo_token: ${{ env.GH_TOKEN }}
+
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ steps.get-branch-name.outputs.head_ref }}
+
+      - name: reopen
+        run: |
+          gh pr reopen ${{env.PR_NUMBER}} \
+          --comment "$MESSAGE"
+        env:
+          MESSAGE: |
+            プルリクエストを再オープンします
+
   test:
     runs-on: ubuntu-latest
 
     steps:
       - name: test
         run: |
-          echo "$GITHUB_BASE_REF"
+          echo ${{env.COMMAND_LIST}}
