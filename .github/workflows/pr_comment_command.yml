@@ -28,18 +28,29 @@ jobs:
 
     steps:
       - name: comment
-        uses: actions/github-script@v3
+        uses: actions/github-script@v6.4.1
         env:
           MESSAGE: |
             プルリクエストをクローズします
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
+          result-encoding: string
+          retries: 3
           script: |
-            github.issues.createComment({
+            const processDate = new Date().toLocaleString("ja")
+            await github.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: process.env.MESSAGE
+              body: process.env.MESSAGE + processDate
+            })
+            await github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: [
+                'Test'
+              ]
             })
 
   test:
