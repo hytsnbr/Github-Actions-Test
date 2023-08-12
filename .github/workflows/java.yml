@@ -3,6 +3,7 @@ name: Java
 on:
   push:
     paths:
+      - ".github/workflows"
       - "java"
 
 concurrency:
