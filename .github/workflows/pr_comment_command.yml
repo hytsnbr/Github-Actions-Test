@@ -11,6 +11,16 @@ on:
 # https://buildersbox.corp-sansan.com/entry/2021/02/05/110000
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: set Env value
+        env:
+          TZ: "Asia/Tokyo" # タイムゾーン指定
+        run: |
+          echo "process_date=`date '+%Y-%m-%d %H:%M:%S'`" >> "$GITHUB_ENV"
+
   pr_close:
     if: contains(github.event.comment.html_url, '/pull/') && startsWith(github.event.comment.body , '/close')
 
@@ -22,7 +32,7 @@ jobs:
         env:
           MESSAGE: |
             "プルリクエストをクローズします"
-            `日時：date '+%Y-%m-%d %H:%M:%S'`
+            "日時：${{env.process_date}}"
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
