@@ -15,22 +15,23 @@ env:
 # https://buildersbox.corp-sansan.com/entry/2021/02/05/110000
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: set Env value
-        env:
-          TZ: "Asia/Tokyo" # タイムゾーン指定
-        run: |
-          echo "process_date=`date '+%Y-%m-%d %H:%M:%S'`" >> "$GITHUB_ENV"
-
   pr_close:
     if: contains(github.event.comment.html_url, '/pull/') && startsWith(github.event.comment.body , '/close')
 
     runs-on: ubuntu-latest
 
     steps:
+      - name: "Get Branch Name"
+        uses: xt0rted/pull-request-comment-branch@29fe0354c01b30fb3de76f193ab33abf8fe5ddb0 #1.2.0
+        id: get-branch-name
+        with:
+          repo_token: ${{ env.GH_TOKEN }}
+
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ steps.get-branch-name.outputs.head_ref }}
       # - name: comment
       #   uses: actions/github-script@v6.4.1
       #   env:
