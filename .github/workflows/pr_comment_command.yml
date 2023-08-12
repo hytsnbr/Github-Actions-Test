@@ -42,7 +42,9 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: process.env.MESSAGE + processDate
+              body: |
+                process.env.MESSAGE
+                "日時：" + processDate
             })
             await github.rest.issues.addLabels({
               issue_number: context.issue.number,
