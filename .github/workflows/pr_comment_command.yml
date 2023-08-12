@@ -11,13 +11,32 @@ on:
 # https://buildersbox.corp-sansan.com/entry/2021/02/05/110000
 
 jobs:
-  pr_command:
-    name: close
+  pr_close:
     if: contains(github.event.comment.html_url, '/pull/') && startsWith(github.event.comment.body , '/close')
 
     runs-on: ubuntu-latest
 
     steps:
-      - name: echo
+      - name: comment
+        uses: actions/github-script@v3
+        env:
+          MESSAGE: |
+            "プルリクエストをクローズします"
+            `日時：date '+%Y-%m-%d %H:%M:%S'`
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: process.env.MESSAGE
+            })
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: test
         run: |
-          echo "TEST"
+          echo "Test"
