@@ -9,7 +9,6 @@ on:
 env:
   GH_TOKEN: ${{ github.token }}
   PR_NUMBER: ${{ github.event.issue.number }}
-  PR_BRANCH: $GITHUB_BASE_REF
 
   COMMAND_LIST: |
     "/close"
@@ -76,4 +75,4 @@ jobs:
     steps:
       - name: test
         run: |
-          echo "${{env.PR_BRANCH}}"
+          echo "$GITHUB_BASE_REF"
