@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Get Branch Name
-        uses: xt0rted/pull-request-comment-branch@6c36a3ede0b9741885912e42afb45e18ee75b318
+        uses: xt0rted/pull-request-comment-branch@d97294d304604fa98a2600a6e2f916a84b596dc7
         id: get-branch-name
         with:
           repo_token: ${{ env.GH_TOKEN }}
