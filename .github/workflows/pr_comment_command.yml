@@ -9,10 +9,11 @@ on:
 env:
   GH_TOKEN: ${{ github.token }}
   PR_NUMBER: ${{ github.event.issue.number }}
+  PR_BRANCH: ${{ github.base_ref }}
 
-# 参考
-# https://akaimo.hatenablog.jp/entry/2020/05/16/101251
-# https://buildersbox.corp-sansan.com/entry/2021/02/05/110000
+  COMMAND_LIST: |
+    "/close"
+    "/reopen"
 
 jobs:
   pr_close:
@@ -67,6 +68,7 @@ jobs:
         env:
           MESSAGE: |
             プルリクエストをクローズします
+            再オープン：/reopen
 
   test:
     runs-on: ubuntu-latest
@@ -74,4 +76,4 @@ jobs:
     steps:
       - name: test
         run: |
-          echo "Test"
+          echo "${{env.PR_BRANCH}}"
