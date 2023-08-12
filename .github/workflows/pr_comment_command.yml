@@ -7,6 +7,7 @@ on:
       - edited
 
 env:
+  GH_TOKEN: ${{ github.token }}
   PR_NUMBER: ${{ github.event.issue.number }}
 
 # 参考
