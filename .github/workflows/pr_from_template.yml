@@ -1,7 +1,7 @@
 name: Create Pull Request from Template
 
 on:
-  workflow_call:
+  workflow_dispatch:
 
 concurrency:
   cancel-in-progress: true
