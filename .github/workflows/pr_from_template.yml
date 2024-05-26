@@ -66,8 +66,3 @@ jobs:
             --body-file pull_request_template_embedded.tmp \
             --label "${{ env.LABEL_NAME }}"
         continue-on-error: true
-        
-      - name: Merge Pull Request
-        run: |
-          gh pr merge ${{ steps.cpr.outputs.pull-request-url }} --merge
-        continue-on-error: true
