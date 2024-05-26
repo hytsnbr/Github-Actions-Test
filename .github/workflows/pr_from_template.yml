@@ -47,13 +47,13 @@ jobs:
       - name: Label Create
         run: |
           gh label create "${{ env.LABEL_NAME }}" \
-            --color "#5d9469" \
+            --color "#ffffff" \
             --description "${{ env.LABEL_NAME }}" \
             --force
         continue-on-error: true
 
       - name: Embedded Params to PR Template
-        run: sed "s|\${Test}|${{ env.process_date }}|g" ./template/pull_request_template.md > pull_request_template_embedded.tmp
+        run: sed "s|\${Test}|${{ env.process_date }}|g" .github/workflows/template/pull_request_template.md > pull_request_template_embedded.tmp
 
       - name: Create Pull Request
         id: cpr
