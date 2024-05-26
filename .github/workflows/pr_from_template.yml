@@ -1,0 +1,73 @@
+name: Create Pull Request from Template
+
+on:
+  workflow_call:
+
+concurrency:
+  cancel-in-progress: true
+  group: "pr_from_template"
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      LABEL_NAME: "プルリクエスト（テンプレートより作成）"
+
+    steps:
+      - name: set Env value
+        env:
+          TZ: "Asia/Tokyo" # タイムゾーン指定
+        run: |
+          echo "process_date=`date '+%Y-%m-%d %H:%M:%S'`" >> "$GITHUB_ENV"
+          echo "branch_name=pr_from_template/at_`date '+%Y-%m-%d_%H-%M-%S'`" >> "$GITHUB_ENV"
+
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create Branch & Checkout
+        run: git checkout -b "${{ env.branch_name }}"
+
+      - name: Create File
+        run: echo $process_date > "${{ env.process_date }}".txt
+
+      - name: Commit & Push
+        id: commit_push
+        run: |
+          set -x
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .
+          git commit -m "Update: ${{ env.process_date }}"
+          git push --set-upstream origin ${{ env.branch_name }}
+
+      - name: Label Create
+        run: |
+          gh label create "${{ env.LABEL_NAME }}" \
+            --color "#5d9469" \
+            --description "${{ env.LABEL_NAME }}" \
+            --force
+        continue-on-error: true
+
+      - name: Embedded Params to PR Template
+        run: sed "s|\${Test}|${{ env.process_date }}|g" ./template/pull_request_template.md > pull_request_template_embedded.tmp
+
+      - name: Create Pull Request
+        id: cpr
+        run: |
+          gh pr create \
+            --assignee hytsnbr \
+            --reviewer hytsnbr \
+            --base main \
+            --title "Test: ${{ env.process_date }}" \
+            --body-file pull_request_template_embedded.tmp \
+            --label "${{ env.LABEL_NAME }}"
+        continue-on-error: true
+        
+      - name: Merge Pull Request
+        run: |
+          gh pr merge ${{ steps.cpr.outputs.pull-request-url }} --merge
+        continue-on-error: true
