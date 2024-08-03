@@ -9,6 +9,9 @@ jobs:
   delete-unused-branches:
     runs-on: ubuntu-latest
 
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4.1.7
