@@ -1,0 +1,19 @@
+name: Delete Unused Branches
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  delete-unused-branches:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4.1.7
+        with:
+          fetch-depth: 0
+
+      - name: Install gh-poi
+        run: gh extension install seachicken/gh-poi
