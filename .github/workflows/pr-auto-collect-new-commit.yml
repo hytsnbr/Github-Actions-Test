@@ -1,0 +1,49 @@
+name: PR Auto Collect New Commit
+
+on:
+  pull_request:
+    types: [
+      opened,
+      synchronize,
+      reopened
+    ]
+
+jobs:
+  pr-auto-collect-new-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Generate Commit Log and Update PR
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          # 1. 差分コミットを [ハッシュ] メッセージ の形式で取得
+          # origin/main...HEAD の形式で比較
+          COMMIT_LOG=$(git log origin/$BASE_BRANCH..origin/$HEAD_BRANCH --pretty=format:"* [%h] %s")
+
+          # 2. 現在のPR本文を取得
+          CURRENT_BODY=$(gh pr view $PR_NUMBER --json body --template '{{.body}}')
+
+          # 3. Perlを使用して「### 変更内容」から「次の見出し」までの間を置換
+          # パターン解説:
+          # (### 変更内容\s*) : 開始地点（見出しとそれに続く空白・改行）
+          # (.*?) : 置換対象（最小一致で次のパターンまでを拾う）
+          # (?=\n###|$) : 終了地点の「先読み」。次の「###」から始まる行、または文末。
+          UPDATED_BODY=$(echo "$CURRENT_BODY" | perl -0777 -pe "s/(### 変更内容\s*).*?(?=\n###|\$)/\$1\n$COMMIT_LOG\n\n/s")
+
+          # 4. 内容に変更がある場合のみPRを更新
+          if [ "$CURRENT_BODY" != "$UPDATED_BODY" ]; then
+            gh pr edit $PR_NUMBER --body "$UPDATED_BODY"
+          fi
