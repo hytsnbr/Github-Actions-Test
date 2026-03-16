@@ -16,6 +16,9 @@ jobs:
       contents: read
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+      HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
 
     steps:
       - name: Checkout Repository
@@ -23,27 +26,29 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Generate Commit Log and Update PR
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
-          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+      - name: コミットログ差分取得
         run: |
-          # 1. 差分コミットを [ハッシュ] メッセージ の形式で取得
+          # 差分コミットを [ハッシュ] メッセージ の形式で取得
           # origin/main...HEAD の形式で比較
-          COMMIT_LOG=$(git log origin/$BASE_BRANCH..origin/$HEAD_BRANCH --pretty=format:"* [%h] %s")
+          echo "COMMIT_LOG=$(git log origin/$BASE_BRANCH..origin/$HEAD_BRANCH --pretty=format:"* [%h] %s")" >> "$GITHUB_ENV"
 
-          # 2. 現在のPR本文を取得
-          CURRENT_BODY=$(gh pr view $PR_NUMBER --json body --template '{{.body}}')
+      - name: プルリクエスト本文取得
+        run: |
+          # 現在のPR本文を取得
+          echo "CURRENT_BODY=$(gh pr view $PR_NUMBER --json body --template '{{.body}}')" >> "$GITHUB_ENV"
 
-          # 3. Perlを使用して「### 変更内容」から「次の見出し」までの間を置換
+      - name: 差分コミットログをプルリクエスト本文に挿入
+        run: |
+          # Perlを使用して「### 変更内容」から「次の見出し」までの間を置換
           # パターン解説:
           # (### 変更内容\s*) : 開始地点（見出しとそれに続く空白・改行）
           # (.*?) : 置換対象（最小一致で次のパターンまでを拾う）
           # (?=\n###|$) : 終了地点の「先読み」。次の「###」から始まる行、または文末。
-          UPDATED_BODY=$(echo "$CURRENT_BODY" | perl -0777 -pe "s/(### 変更内容\s*).*?(?=\n###|\$)/\$1\n$COMMIT_LOG\n\n/s")
+          echo "UPDATED_BODY=$(echo "$CURRENT_BODY" | perl -0777 -pe "s/(### 変更内容\s*).*?(?=\n###|\$)/\$1\n$COMMIT_LOG\n\n/s")" >> "$GITHUB_ENV"
 
-          # 4. 内容に変更がある場合のみPRを更新
+      - name: プルリクエスト本文を更新
+        run: |
+          # 内容に変更がある場合のみPRを更新
           if [ "$CURRENT_BODY" != "$UPDATED_BODY" ]; then
             gh pr edit $PR_NUMBER --body "$UPDATED_BODY"
           fi
