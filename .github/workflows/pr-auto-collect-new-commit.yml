@@ -30,12 +30,20 @@ jobs:
         run: |
           # 差分コミットを [ハッシュ] メッセージ の形式で取得
           # origin/main...HEAD の形式で比較
-          echo "COMMIT_LOG=$(git log origin/$BASE_BRANCH..origin/$HEAD_BRANCH --pretty=format:"* [%h] %s")" >> "$GITHUB_ENV"
+          {
+            echo "COMMIT_LOG<<EOF"
+            git log origin/${BASE_BRANCH}..origin/${HEAD_BRANCH} --pretty=format:"* [%h] %s")
+            echo "EOF"
+          } >> "$GITHUB_ENV"
 
       - name: プルリクエスト本文取得
         run: |
           # 現在のPR本文を取得
-          echo "CURRENT_BODY=$(gh pr view $PR_NUMBER --json body --template '{{.body}}')" >> "$GITHUB_ENV"
+          {
+            echo "CURRENT_BODY<<EOF"
+            gh pr view ${PR_NUMBER} --json body --template '{{.body}}')
+            echo "EOF"
+          } >> "$GITHUB_ENV"
 
       - name: 差分コミットログをプルリクエスト本文に挿入
         run: |
@@ -44,11 +52,15 @@ jobs:
           # (### 変更内容\s*) : 開始地点（見出しとそれに続く空白・改行）
           # (.*?) : 置換対象（最小一致で次のパターンまでを拾う）
           # (?=\n###|$) : 終了地点の「先読み」。次の「###」から始まる行、または文末。
-          echo "UPDATED_BODY=$(echo "$CURRENT_BODY" | perl -0777 -pe "s/(### 変更内容\s*).*?(?=\n###|\$)/\$1\n$COMMIT_LOG\n\n/s")" >> "$GITHUB_ENV"
+          UPDATED=$(echo "$CURRENT_BODY" | perl -0777 -pe "s/(### 変更内容\s*).*?(?=\n###|\$)/\$1\n$COMMIT_LOG\n\n/s")
+          {
+            echo "UPDATED_BODY<<EOF"
+            echo "$UPDATED"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
 
       - name: プルリクエスト本文を更新
+        if: ${{ env.CURRENT_BODY }} != ${{ env.UPDATED_BODY }}
         run: |
-          # 内容に変更がある場合のみPRを更新
-          if [ "$CURRENT_BODY" != "$UPDATED_BODY" ]; then
-            gh pr edit $PR_NUMBER --body "$UPDATED_BODY"
-          fi
+          gh pr edit "$PR_NUMBER" --body "$UPDATED_BODY"
+          
