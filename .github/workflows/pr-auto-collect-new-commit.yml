@@ -32,7 +32,7 @@ jobs:
           # origin/main...HEAD の形式で比較
           {
             echo "COMMIT_LOG<<EOF"
-            git log origin/${BASE_BRANCH}..origin/${HEAD_BRANCH} --pretty=format:"* [%h] %s")
+            git log origin/${BASE_BRANCH}..origin/${HEAD_BRANCH} --pretty=format:"* [%h] %s"
             echo "EOF"
           } >> "$GITHUB_ENV"
 
@@ -41,7 +41,7 @@ jobs:
           # 現在のPR本文を取得
           {
             echo "CURRENT_BODY<<EOF"
-            gh pr view ${PR_NUMBER} --json body --template '{{.body}}')
+            gh pr view ${PR_NUMBER} --json body --template '{{.body}}'
             echo "EOF"
           } >> "$GITHUB_ENV"
 
