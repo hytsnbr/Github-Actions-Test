@@ -28,6 +28,7 @@ jobs:
 
       - name: コミットログ差分取得
         run: |
+          # origin/mainブランチからのコミット差分を取得
           # origin/ブランチ名が解決できない問題を避けるため、確実な SHA を使用
           # 実行結果を一度シェル変数に入れ、空の場合でもヒアドキュメントが壊れないようにする
           LOG_CONTENT=$(git log ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} --pretty=format:"* [%h] %s")
@@ -40,9 +41,11 @@ jobs:
       - name: プルリクエスト本文取得
         run: |
           # 現在のPR本文を取得
+          # 実行結果を一度シェル変数に入れ、空の場合でもヒアドキュメントが壊れないようにする
+          BODY_CONTENT=$(gh pr view "$PR_NUMBER" --json body --template '{{.body}}')
           {
             echo "CURRENT_BODY<<EOF"
-            gh pr view "${PR_NUMBER}" --json body --template '{{.body}}'
+            echo "$BODY_CONTENT"
             echo "EOF"
           } >> "$GITHUB_ENV"
 
