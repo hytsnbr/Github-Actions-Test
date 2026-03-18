@@ -28,11 +28,12 @@ jobs:
 
       - name: コミットログ差分取得
         run: |
-          # 差分コミットを [ハッシュ] メッセージ の形式で取得
-          # origin/main...HEAD の形式で比較
+          # origin/ブランチ名が解決できない問題を避けるため、確実な SHA を使用
+          # 実行結果を一度シェル変数に入れ、空の場合でもヒアドキュメントが壊れないようにする
+          LOG_CONTENT=$(git log ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} --pretty=format:"* [%h] %s")
           {
             echo "COMMIT_LOG<<EOF"
-            git log origin/${BASE_BRANCH}..origin/${HEAD_BRANCH} --pretty=format:"* [%h] %s"
+            echo "$LOG_CONTENT"
             echo "EOF"
           } >> "$GITHUB_ENV"
 
@@ -41,7 +42,7 @@ jobs:
           # 現在のPR本文を取得
           {
             echo "CURRENT_BODY<<EOF"
-            gh pr view ${PR_NUMBER} --json body --template '{{.body}}'
+            gh pr view "${PR_NUMBER}" --json body --template '{{.body}}'
             echo "EOF"
           } >> "$GITHUB_ENV"
 
@@ -51,8 +52,9 @@ jobs:
           # パターン解説:
           # (### 変更内容\s*) : 開始地点（見出しとそれに続く空白・改行）
           # (.*?) : 置換対象（最小一致で次のパターンまでを拾う）
-          # (?=\n###|$) : 終了地点の「先読み」。次の「###」から始まる行、または文末。
-          UPDATED=$(echo "$CURRENT_BODY" | perl -0777 -pe "s/(### 変更内容\s*).*?(?=\n###|\$)/\$1\n$COMMIT_LOG\n\n/s")
+          # (?=\n###|$) : 終了地点の「先読み」。次の「###」から始まる行、または文末
+          # インジェクション対策として Perl 内では $ENV{...} を使用
+          UPDATED=$(echo "$CURRENT_BODY" | perl -0777 -pe 's/(### 変更内容\s*).*?(?=\n###|$)/$1\n$ENV{COMMIT_LOG}\n\n/s')
           {
             echo "UPDATED_BODY<<EOF"
             echo "$UPDATED"
@@ -60,7 +62,7 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: プルリクエスト本文を更新
-        if: ${{ env.CURRENT_BODY }} != ${{ env.UPDATED_BODY }}
+        # 重要: if 文の中では ${{ }} を使わず、env.変数名 で直接比較する
+        if: env.CURRENT_BODY != env.UPDATED_BODY
         run: |
           gh pr edit "$PR_NUMBER" --body "$UPDATED_BODY"
-          
