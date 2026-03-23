@@ -1,0 +1,40 @@
+name: Auto Patch Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # リリース作成とタグ打ちに必要
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 全履歴を取得（タグの計算に必要）
+
+      # 1. 現在のバージョンを取得し、パッチをインクリメントする
+      # ここでは便利な 'anothrNick/github-tag-action' を使用例にします
+      - name: Bump version and push tag
+        id: tag_version
+        uses: anothrNick/github-tag-action@1.64.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          DEFAULT_BUMP: patch # デフォルトでパッチ（0.0.x）を上げる
+
+      # 2. GitHub Releaseを作成する
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: |
+            Automated release for commit ${{ github.sha }}
+            Change Log: ${{ github.event.head_commit.message }}
+          draft: false
+          prerelease: false
