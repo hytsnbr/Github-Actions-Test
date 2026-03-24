@@ -1,0 +1,38 @@
+name: "Lint PR Title"
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+
+permissions:
+  pull-requests: read
+
+jobs:
+  main:
+    name: Validate PR Title
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: amannn/action-semantic-pull-request@ac7e3fc035c47465748bbcb1a822c1583cf79bbc
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # 許可するタイプを明示（release.yml のカテゴリと合わせる）
+          types: |
+            feat
+            fix
+            chore
+            refactor
+            perf
+            style
+            docs
+            test
+            ci
+          # スコープ（例: feat(auth): ...）の入力を必須にする場合は true
+          requireScope: false
+          # 件名の開始は大文字・小文字どちらでもOKにする設定（任意）
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: "PRのタイトルは小文字から始めてください（例: feat: add login）"
