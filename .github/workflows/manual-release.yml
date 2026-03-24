@@ -20,28 +20,6 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
-          token: ${{ secrets.RELEASE_TOKEN }}name: Manual Major/Minor Release
-on:
-  workflow_dispatch:
-    inputs:
-      bump_type:
-        description: 'バージョンアップの種類'
-        required: true
-        default: 'minor'
-        type: choice
-        options: [major, minor]
-
-jobs:
-  manual-tagging:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      
-    steps:
-      - name: checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-        with:
-          fetch-depth: 0
           token: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Check for changes since last tag
