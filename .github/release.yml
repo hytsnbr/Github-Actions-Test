@@ -1,0 +1,43 @@
+# .github/release.yml
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+    authors:
+      - github-actions[bot]
+  
+  categories:
+    - title: "🚀 New Features"
+      labels:
+        - enhancement
+      title_prefixes:
+        - "feat:"
+        - "feature:"
+    
+    - title: "🐛 Bug Fixes"
+      labels:
+        - bug
+      title_prefixes:
+        - "fix:"
+    
+    - title: "🧰 Maintenance & Refactoring"
+      title_prefixes:
+        - "chore:"
+        - "refactor:"
+        - "perf:"
+        - "style:"
+    
+    - title: "📝 Documentation"
+      title_prefixes:
+        - "docs:"
+    
+    - title: "🧪 Testing"
+      title_prefixes:
+        - "test:"
+    
+    - title: "⚙️ CI/CD"
+      title_prefixes:
+        - "ci:"
+
+  # 分類に当てはまらないものは「Other Changes」としてまとめる
+  default_category: "Other Changes"
