@@ -16,7 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: amannn/action-semantic-pull-request@ac7e3fc035c47465748bbcb1a822c1583cf79bbc
+      - name: lint pr title
+        uses: amannn/action-semantic-pull-request@ac7e3fc035c47465748bbcb1a822c1583cf79bbc
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -33,6 +34,27 @@ jobs:
             ci
           # スコープ（例: feat(auth): ...）の入力を必須にする場合は true
           requireScope: false
-          # 件名の開始は大文字・小文字どちらでもOKにする設定（任意）
-          subjectPattern: ^(?![A-Z]).+$
-          subjectPatternError: "PRのタイトルは小文字から始めてください（例: feat: add login）"
+      
+      - name: post comment on failure
+        if: failure()
+        uses: marocchino/sticky-pull-request-comment@5a61de79c6a3f3f961d6e3ceea2efe7b4cd01f32
+        with:
+          header: pr-title-lint-error
+          message: |
+            ### ❌ PRタイトルの形式が正しくありません
+            
+            リリースノートの自動生成を正しく行うため、[Conventional Commits](https://www.conventionalcommits.org/ja/v1.0.0/) に準拠したタイトルに変更してください。
+            
+            **例:**
+            - `feat: ユーザーログイン機能の追加`
+            - `fix: 認証エラーの修正`
+            - `docs: READMEの更新`
+            
+            **現在のタイトル:** `${{ github.event.pull_request.title }}`
+
+      - name: Delete Comment on Success
+        if: success()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: pr-title-lint-error
+          delete: true
