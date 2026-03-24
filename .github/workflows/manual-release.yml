@@ -7,6 +7,28 @@ on:
         required: true
         default: 'minor'
         type: choice
+        options: [ major, minor ]
+
+jobs:
+  manual-tagging:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN }}name: Manual Major/Minor Release
+on:
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'バージョンアップの種類'
+        required: true
+        default: 'minor'
+        type: choice
         options: [major, minor]
 
 jobs:
@@ -22,7 +44,23 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.RELEASE_TOKEN }}
 
+      - name: Check for changes since last tag
+        id: check_changes
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          # 最新タグからmain先端までのコミット数をカウント
+          COMMITS_COUNT=$(git rev-list $LATEST_TAG..main --count)
+          echo "count=$COMMITS_COUNT" >> $GITHUB_OUTPUT
+          echo "Latest tag: $LATEST_TAG, New commits: $COMMITS_COUNT"
+
+      # 差分がない場合にエラーではなく「正常終了（スキップ）」として通知
+      - name: Halt if no changes
+        if: steps.check_changes.outputs.count == '0'
+        run: |
+          echo "::notice::前回のタグから差分がないため、リリースを中断します。"
+
       - name: Bump and Push Tag
+        if: steps.check_changes.outputs.count > '0'
         run: |
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           VERSION=${LATEST_TAG#v}
