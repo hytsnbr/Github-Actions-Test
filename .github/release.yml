@@ -7,31 +7,27 @@ changelog:
       - github-actions[bot]
   
   categories:
-    - title: "🚀 New Features"
-      labels:
-        - enhancement
+    - title: "🚀 新機能"
       title_prefixes:
         - "feat:"
         - "feature:"
     
-    - title: "🐛 Bug Fixes"
-      labels:
-        - bug
+    - title: "🐛 バグ修正"
       title_prefixes:
         - "fix:"
     
-    - title: "🧰 Maintenance & Refactoring"
+    - title: "🧰 メンテナンス&リファクタリング"
       title_prefixes:
         - "chore:"
         - "refactor:"
         - "perf:"
         - "style:"
     
-    - title: "📝 Documentation"
+    - title: "📝 ドキュメント関連"
       title_prefixes:
         - "docs:"
     
-    - title: "🧪 Testing"
+    - title: "🧪 テスト関連"
       title_prefixes:
         - "test:"
     
@@ -40,4 +36,4 @@ changelog:
         - "ci:"
 
   # 分類に当てはまらないものは「Other Changes」としてまとめる
-  default_category: "Other Changes"
+  default_category: "その他変更"
