@@ -26,11 +26,19 @@ jobs:
       - name: Check for changes since last tag
         id: check_changes
         run: |
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          # 最新タグからmain先端までのコミット数をカウント
-          COMMITS_COUNT=$(git rev-list $LATEST_TAG..main --count)
+          # 最新タグを取得。なければ空文字
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          
+          if [ -z "$LATEST_TAG" ]; then
+            # タグが1つもない場合は、全コミット数をカウント
+            COMMITS_COUNT=$(git rev-list --count HEAD)
+          else
+            # タグがある場合は、タグからの差分をカウント
+            COMMITS_COUNT=$(git rev-list $LATEST_TAG..HEAD --count)
+          fi
+          
           echo "count=$COMMITS_COUNT" >> $GITHUB_OUTPUT
-          echo "Latest tag: $LATEST_TAG, New commits: $COMMITS_COUNT"
+          echo "Latest tag: ${LATEST_TAG:-None}, New commits: $COMMITS_COUNT"
 
       # 差分がない場合にエラーではなく「正常終了（スキップ）」として通知
       - name: Halt if no changes
