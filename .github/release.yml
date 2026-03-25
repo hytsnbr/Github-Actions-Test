@@ -1,5 +1,7 @@
 # .github/release.yml
 changelog:
+  # マージされていない直コミットも含める
+  include_non_merged_commits: true
   exclude:
     labels:
       - ignore-for-release
