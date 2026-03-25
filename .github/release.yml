@@ -36,4 +36,4 @@ changelog:
         - "ci:"
 
   # 分類に当てはまらないものは「Other Changes」としてまとめる
-  default_category: "その他変更"
+  default_category: "📦 その他変更"
